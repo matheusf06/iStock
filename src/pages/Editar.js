@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Navbar, Form, Button, Container, Row, Col } from "react-bootstrap";
+import {
+  Navbar,
+  Form,
+  Button,
+  Container,
+  Row,
+  Col,
+  Spinner,
+} from "react-bootstrap";
 import { BiArrowBack } from "react-icons/bi";
 import axios from "axios";
 
@@ -15,18 +23,23 @@ function Header() {
 
 export default function Editar({ match }) {
   const [produto, setProduto] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios
-      .get(
-        `https://produtos-apirest.herokuapp.com/api/produto/${match.params.prodId}`
-      )
-      .then((res) => {
-        setProduto(res.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    async function fetchApi() {
+      await axios
+        .get(
+          `https://produtos-apirest.herokuapp.com/api/produto/${match.params.prodId}`
+        )
+        .then((res) => {
+          setProduto(res.data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+    fetchApi();
   }, []);
 
   function handleChangeProdutoNome(event) {
@@ -87,59 +100,74 @@ export default function Editar({ match }) {
       });
   }
 
+  function MySpinner() {
+    return (
+      <div className="center">
+        <Spinner animation="grow" />
+      </div>
+    );
+  }
+
   return (
     <>
       <Header />
       <Container>
-        <h3>Produto: {produto.id}</h3>
-        <Form>
-          <Row>
-            <Col>
-              <Form.Group>
-                <Form.Label>Nome</Form.Label>
-                <Form.Control
-                  value={produto.nome}
-                  onChange={(event) => handleChangeProdutoNome(event)}
-                />
-              </Form.Group>
-            </Col>
-          </Row>
+        {loading ? (
+          <MySpinner />
+        ) : (
+          <>
+            <h3>Produto: {produto.id}</h3>
 
-          <Row>
-            <Col>
-              <Form.Group>
-                <Form.Label>Quantidade</Form.Label>
-                <Form.Control
-                  value={produto.quantidade}
-                  onChange={(event) => handleChangeProdutoQuantidade(event)}
-                />
-              </Form.Group>
-            </Col>
-            <Col>
-              <Form.Group>
-                <Form.Label>Valor</Form.Label>
-                <Form.Control
-                  value={produto.valor}
-                  onChange={(event) => handleChangeProdutoValor(event)}
-                />
-              </Form.Group>
-            </Col>
-          </Row>
+            <Form>
+              <Row>
+                <Col>
+                  <Form.Group>
+                    <Form.Label>Nome</Form.Label>
+                    <Form.Control
+                      value={produto.nome}
+                      onChange={(event) => handleChangeProdutoNome(event)}
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
 
-          <Row>
-            <Col>
-              <Button variant="primary" onClick={() => salvar()}>
-                Salvar
-              </Button>
-            </Col>
+              <Row>
+                <Col>
+                  <Form.Group>
+                    <Form.Label>Quantidade</Form.Label>
+                    <Form.Control
+                      value={produto.quantidade}
+                      onChange={(event) => handleChangeProdutoQuantidade(event)}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col>
+                  <Form.Group>
+                    <Form.Label>Valor</Form.Label>
+                    <Form.Control
+                      value={produto.valor}
+                      onChange={(event) => handleChangeProdutoValor(event)}
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
 
-            <Col>
-              <Button variant="outline-danger" onClick={() => excluir()}>
-                Excluir
-              </Button>
-            </Col>
-          </Row>
-        </Form>
+              <Row>
+                <Col>
+                  <Button variant="primary" onClick={() => salvar()}>
+                    Salvar
+                  </Button>
+                </Col>
+
+                <Col>
+                  <Button variant="outline-danger" onClick={() => excluir()}>
+                    Excluir
+                  </Button>
+                </Col>
+              </Row>
+            </Form>
+          </>
+        )}
       </Container>
     </>
   );
